@@ -28,7 +28,11 @@ README). The rack and Proxmox are just how this particular build is set up.
 ## Getting the picture: capture and streaming
 
 - **Capture:** an **Elgato Cam Link 4K** (USB HDMI capture). It shows up on Linux as a normal video device and
-  ALSA audio device.
+  ALSA audio device. Why this card: the requirements were **USB 3.0** (cheap USB 2.0 sticks compress the video to
+  MJPEG before the computer gets it), **UVC / driver-free** on Linux, and **1080p60**. Passthrough wasn't needed,
+  because the extender feeds the TV. The Cam Link met all three and was in stock at the local store
+  (about $100), so it could be set up the same day. The $5–20 no-name cards were skipped as USB 2.0. They're
+  untested here, not known to fail.
 - **Encoding:** `ffmpeg` encodes H.264 with every low-latency option turned on: `superfast` preset, no
   lookahead (`rc-lookahead=0`, `sync-lookahead=0`), `-fflags nobuffer -flags low_delay`, a small
   `thread_queue_size`, a VBV buffer of half the bitrate, and packets flushed right away.
