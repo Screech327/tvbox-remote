@@ -35,6 +35,10 @@
 #include <EEPROM.h>
 #include <Adafruit_TinyUSB.h>
 #include "device/usbd_pvt.h"
+// Explicit C-linkage prototypes: stops the Arduino prototype generator from inventing (wrong) ones for these
+extern "C" const usbd_class_driver_t* usbd_app_driver_get_cb(uint8_t* count);
+extern "C" void usbdlog_event(uint8_t e, uint32_t v);
+extern "C" void usbdlog_setup(tusb_control_request_t const* r);
 
 #define FW_VERSION "pico-6"
 #define UDP_PORT 4210
@@ -196,7 +200,7 @@ static bool micControl(uint8_t rhport, uint8_t stage, tusb_control_request_t con
 }
 static bool micXfer(uint8_t, uint8_t, xfer_result_t, uint32_t) { return true; }
 static usbd_class_driver_t const micDriver = { "MIC", micInit, micDeinit, micReset, micOpen, micControl, micXfer, nullptr, nullptr };
-extern "C" usbd_class_driver_t const* usbd_app_driver_get_cb(uint8_t* count) { *count = 1; return &micDriver; }
+extern "C" const usbd_class_driver_t* usbd_app_driver_get_cb(uint8_t* count) { *count = 1; return &micDriver; }
 
 static uint8_t const ascii2kc[128][2] = { HID_ASCII_TO_KEYCODE };
 
