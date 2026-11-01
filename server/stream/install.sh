@@ -48,10 +48,29 @@ if [ -z "${AUDIO:-}" ]; then
   AUDIO=${CARD:+hw:$CARD,0}
   AUDIO=${AUDIO:-none}
 fi
-FMT=yuyv422
-v4l2-ctl -d "$VIDEO" --list-formats 2>/dev/null | grep -q NV12 && FMT=nv12
-v4l2-ctl -d "$VIDEO" --list-formats 2>/dev/null | grep -q MJPG && ! v4l2-ctl -d "$VIDEO" --list-formats 2>/dev/null | grep -qE 'NV12|YUYV' && FMT=mjpeg
-echo "   video: $VIDEO ($FMT)   audio: $AUDIO"
+# Pick a format that can actually do 1920x1080 at the frame rate. Cheap USB 2 cards often list YUYV but only at
+# low frame rates for 1080p, and do 1080p60/30 only as MJPEG. Preference: NV12, then YUYV, then MJPEG.
+# Prints the v4l2 fourccs that offer 1920x1080 at >= $1 fps.
+fmts_at() {
+  v4l2-ctl -d "$VIDEO" --list-formats-ext 2>/dev/null | awk -v want="$1" -v q="'" '
+    /^[ \t]*\[[0-9]+\]:/ { split($0, a, q); f=a[2] }
+    /Size:/ { s=$NF }
+    /Interval:/ && s=="1920x1080" { if (match($0, /\(([0-9.]+) fps\)/)) { v=substr($0, RSTART+1, RLENGTH-6)+0; if (v>=want-0.5) print f } }' | sort -u
+}
+pick_fmt() {
+  local have; have=$(fmts_at "$1")
+  for f in NV12:nv12 YUYV:yuyv422 MJPG:mjpeg; do
+    echo "$have" | grep -qx "${f%%:*}" && { echo "${f##*:}"; return; }
+  done
+}
+FPS_DEFAULT=60
+FMT=$(pick_fmt 60)
+if [ -z "$FMT" ]; then FMT=$(pick_fmt 30); FPS_DEFAULT=30; fi
+if [ -z "$FMT" ]; then
+  echo "   warning: couldn't find a 1080p format; guessing yuyv422. Check: v4l2-ctl -d $VIDEO --list-formats-ext"
+  FMT=yuyv422
+fi
+echo "   video: $VIDEO ($FMT, 1080p$FPS_DEFAULT)   audio: $AUDIO"
 
 echo "== Writing settings"
 cp "$SRC/mediamtx.yml" /etc/mediamtx.yml
@@ -63,7 +82,7 @@ VIDEO=$VIDEO
 AUDIO=$AUDIO             # ALSA device of the capture card, or none for video only
 INPUT_FORMAT=$FMT        # nv12 / yuyv422 / mjpeg (see: v4l2-ctl -d $VIDEO --list-formats-ext)
 SIZE=1920x1080
-FPS=60                   # 30 halves the CPU use
+FPS=$FPS_DEFAULT                   # 30 halves the CPU use
 BITRATE=8M               # lower (4M) if it stutters away from home
 PRESET=superfast         # veryfast = sharper but more CPU; ultrafast = least CPU
 ENV
