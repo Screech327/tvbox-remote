@@ -53,7 +53,7 @@ With the box in the rack, its single HDMI output has to feed both the Cam Link a
 3. The plan was to have the Pico press that button through a **relay** (GP15). The relay works and is still
    wired, but opening the Anker to solder onto the button wasn't appealing.
 4. **Current plan: an HDMI splitter** (ezcoo SP12H2 ordered). Both outputs get the picture at once, so nothing
-   needs switching. It has EDID modes and a downscaler, and it lists HDCP handling, which matters given step 1.
+   needs switching. It has EDID modes and a downscaler. Whether its capture output works is what the test will show (see step 1).
    *Status: being tested.*
 
 **Lesson: anything between the box and the capture card has to deal with HDCP.** If your capture shows no

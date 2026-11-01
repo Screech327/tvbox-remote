@@ -8,15 +8,18 @@ AI assistant (see `CLAUDE.md`).
 
 ## 0. Pick your layout
 
+Pictures of each layout: [docs/DIAGRAMS.md](DIAGRAMS.md).
+
 | You want… | Layout |
 |---|---|
 | Only to watch remotely (TV not used) | **A:** box → capture card → host |
 | Remote + the TV in the same room | **B:** box → HDMI splitter → TV + capture card |
 | Remote + a TV in another room | **C:** box → HDMI splitter → capture card + HDMI extender → TV |
 
-**HDCP warning:** the TV box's output may be copy-protected (HDCP), and capture cards refuse copy-protected
-signals: the picture stays black. A plain pass-through, like an extender's loop-out, won't fix that. In layouts
-B and C, the splitter is what has to handle it. See `docs/HISTORY.md`.
+**HDCP warning:** the TV box's output may be copy-protected (HDCP), and capture cards can't receive
+copy-protected video: the picture stays black. A plain pass-through, like an extender's loop-out, doesn't change
+that. In layouts B and C, the capture card only gets a picture if the splitter's output is one it accepts.
+See `docs/HISTORY.md`.
 
 ## 1. Parts
 
@@ -107,7 +110,7 @@ Settings are in `/etc/vseebox-control.env`. After editing: `sudo systemctl resta
 | Symptom | Fix |
 |---|---|
 | **Keys lag, land in bunches, stick, or go the wrong way** | **Restart the TV box first** (Restart box button, or unplug it). A stuck key can leave Android's input handling in a bad state that looks exactly like a USB problem. |
-| Capture picture is black, but the TV works | **HDCP.** Put something that handles HDCP between the box and the capture card: a splitter or switch. A loop-out isn't enough. |
+| Capture picture is black, but the TV works | **HDCP.** The capture card is getting copy-protected video. The device in front of the card, the splitter or switch, decides what the card receives. A loop-out passes the protection straight through. |
 | Back does nothing | Use the page's Back / Esc / right-click, which send the media Back key. Plain Backspace only works as Back for some remotes' own USB IDs. |
 | The mouse pointer isn't visible | It's parked at a screen edge. Move the mouse toward the middle of the picture. Video players also hide it while paused. |
 | Pico LED blinking slowly | It's in setup mode: no settings, or no Wi-Fi for 10 minutes. Join `vSeeBox-Remote-Setup` and save again. |

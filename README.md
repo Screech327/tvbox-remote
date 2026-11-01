@@ -30,6 +30,7 @@ how to walk you through the setup and which mistakes to avoid.
 | `server/control/` | Control page + small Python server (no dependencies) |
 | `server/examples/` | Optional: Proxmox LXC installer |
 | `docs/SETUP.md` | **Step-by-step setup guide** |
+| `docs/DIAGRAMS.md` | Which layout you need, how it all connects, and the reference home-lab build |
 | `docs/HISTORY.md` | **Why everything is the way it is**: what was tried, what broke, lessons learned |
 
 ## Parts (reference build)
