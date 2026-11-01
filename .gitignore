@@ -1,0 +1,12 @@
+# secrets and local config — never commit
+secrets.h
+*.env
+.env*
+# build output
+build/
+out/
+*.uf2
+*.bin
+*.elf
+*.map
+__pycache__/

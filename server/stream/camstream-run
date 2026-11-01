@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Captures the Cam Link and publishes it to MediaMTX as /vseebox.
+set -a; . /etc/camstream.env; set +a
+AUDIO="${AUDIO%% *}"
+GOP=$(( FPS * 2 ))
+# Low delay: no input buffering, small capture queue (a big queue hides lag instead of dropping frames).
+args=(-hide_banner -loglevel warning -nostdin -fflags nobuffer -flags low_delay
+  -f v4l2 -input_format "$INPUT_FORMAT" -video_size "$SIZE" -framerate "$FPS" -thread_queue_size 8 -i "$VIDEO")
+if [ "$AUDIO" != "none" ]; then
+  args+=(-f alsa -thread_queue_size 1024 -channels 2 -sample_rate 48000 -i "$AUDIO")
+fi
+args+=(-map 0:v -c:v libx264 -preset "$PRESET" -tune zerolatency -profile:v baseline -pix_fmt yuv420p
+  -b:v "$BITRATE" -maxrate "$BITRATE" -bufsize "$(( ${BITRATE%M} / 2 ))M" -g "$GOP" -keyint_min "$FPS" -sc_threshold 0
+  -x264-params "rc-lookahead=0:sync-lookahead=0")
+if [ "$AUDIO" != "none" ]; then
+  args+=(-map 1:a -c:a libopus -b:a 128k -ar 48000)
+fi
+args+=(-flush_packets 1 -f rtsp -rtsp_transport tcp rtsp://127.0.0.1:8554/vseebox)
+exec ffmpeg "${args[@]}"

@@ -1,0 +1,62 @@
+--- usbd.c.orig	2026-10-31 20:17:56.130177296 +0000
++++ usbd.c	2026-10-31 20:18:05.213176740 +0000
+@@ -34,6 +34,8 @@
+ 
+ #include "device/usbd.h"
+ #include "device/usbd_pvt.h"
++TU_ATTR_WEAK void usbdlog_event(uint8_t e, uint32_t v) { (void) e; (void) v; }
++TU_ATTR_WEAK void usbdlog_setup(tusb_control_request_t const* r) { (void) r; }
+ 
+ //--------------------------------------------------------------------+
+ // USBD Configuration
+@@ -699,12 +701,14 @@
+ 
+     switch (event.event_id) {
+       case DCD_EVENT_BUS_RESET:
++        usbdlog_event(1, event.bus_reset.speed);
+         TU_LOG_USBD(": %s Speed\r\n", tu_str_speed[event.bus_reset.speed]);
+         usbd_reset(event.rhport);
+         _usbd_dev.speed = event.bus_reset.speed;
+         break;
+ 
+       case DCD_EVENT_UNPLUGGED:
++        usbdlog_event(2, 0);
+         TU_LOG_USBD("\r\n");
+         usbd_reset(event.rhport);
+         tud_umount_cb();
+@@ -729,8 +733,10 @@
+         _usbd_dev.ep_status[0][TUSB_DIR_OUT] = 0;
+         _usbd_dev.ep_status[0][TUSB_DIR_IN] = 0;
+ 
++        usbdlog_setup(&event.setup_received);
+         // Process control request
+         if (!process_setup_received(event.rhport, &event.setup_received)) {
++          usbdlog_event(6, 0);
+           TU_LOG_USBD("  Stall EP0\r\n");
+           // Failed -> stall both control endpoint IN and OUT
+           dcd_edpt_stall(event.rhport, TU_EP0_OUT);
+@@ -746,6 +752,8 @@
+ 
+         TU_LOG_USBD("on EP %02X with %u bytes\r\n", ep_addr, (unsigned int) event.xfer_complete.len);
+ 
++        if (event.xfer_complete.result != XFER_RESULT_SUCCESS) usbdlog_event(5, ((uint32_t) ep_addr << 8) | event.xfer_complete.result);
++        else if (epnum) usbdlog_event(7, ep_addr);
+         // Clear busy + claimed
+         _usbd_dev.ep_status[epnum][ep_dir] &= (uint8_t) ~(TU_EDPT_STATE_BUSY | TU_EDPT_STATE_CLAIMED);
+ 
+@@ -766,6 +774,7 @@
+         // can accidentally meet the SUSPEND condition ( Bus Idle for 3ms ), which result in a series of event
+         // e.g suspend -> resume -> unplug/plug. Skip suspend/resume if not connected
+         if (_usbd_dev.connected) {
++          usbdlog_event(3, _usbd_dev.remote_wakeup_en);
+           TU_LOG_USBD(": Remote Wakeup = %u\r\n", _usbd_dev.remote_wakeup_en);
+           tud_suspend_cb(_usbd_dev.remote_wakeup_en);
+         } else {
+@@ -775,6 +784,7 @@
+ 
+       case DCD_EVENT_RESUME:
+         if (_usbd_dev.connected) {
++          usbdlog_event(4, 0);
+           TU_LOG_USBD("\r\n");
+           tud_resume_cb();
+         } else {
