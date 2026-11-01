@@ -14,14 +14,22 @@ Tested on a **vSeeBox**. It should work with most Android TV boxes that accept a
 > everyone else is next: one-command Docker setup, automatic Pico discovery, prebuilt firmware, setup guides and
 > diagrams for each layout.
 
+## Set it up
+
+**Follow [docs/SETUP.md](docs/SETUP.md).** It goes from parts to watching on your phone, with a check after every
+step and a troubleshooting table. Using an AI assistant? Point it at this repo. [CLAUDE.md](CLAUDE.md) tells it
+how to walk you through the setup and which mistakes to avoid.
+
 ## What's in here
 
 | Path | What |
 |---|---|
-| `firmware/tvbox-remote/` | Pico 2 W firmware (Arduino, arduino-pico core, Adafruit TinyUSB) |
+| `firmware/` | Pico 2 W firmware, how to flash it, how to build it, and the command protocol |
 | `firmware/patches/` | Optional TinyUSB patch that enables the `/usblog` USB request log |
 | `server/stream/` | Capture + streaming: ffmpeg → MediaMTX (WebRTC/HLS), systemd units |
 | `server/control/` | Control page + small Python server (no dependencies) |
+| `server/examples/` | Optional: Proxmox LXC installer |
+| `docs/SETUP.md` | **Step-by-step setup guide** |
 | `docs/HISTORY.md` | **Why everything is the way it is**: what was tried, what broke, lessons learned |
 
 ## Parts (reference build)

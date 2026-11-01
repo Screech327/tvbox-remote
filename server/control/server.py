@@ -2,11 +2,11 @@
 """vSeeBox control page.
 
 Serves one page that shows the live stream and turns clicks, keys and buttons into
-commands for the Nano ESP32 plugged into the vSeeBox.
+commands for the Pico 2 W plugged into the TV box.
 
   GET  /             the page
-  POST /api/cmd      body = commands, one per line  -> one UDP packet to the Nano
-  GET  /api/status   pings the Nano, reports round-trip time
+  POST /api/cmd      body = commands, one per line  -> one UDP packet to the Pico
+  GET  /api/status   pings the Pico, reports round-trip time
   POST /whep         WebRTC offer, passed through to MediaMTX (keeps the page on one origin)
 
 Settings come from /etc/vseebox-control.env (see install.sh). Standard library only.
@@ -68,7 +68,7 @@ def clean(lines):
 
 
 def send(cmds):
-    """Send commands to the Nano in one packet (token once, then one command per line)."""
+    """Send commands to the Pico in one packet (token once, then one command per line)."""
     payload = (TOKEN + " " + "\n".join(cmds)).encode("utf-8", "ignore")[:1000]
     with _lock:
         _sock.sendto(payload, (ESP_HOST, ESP_PORT))
@@ -136,7 +136,7 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path == "/api/cmd":
             if not configured():
-                return self._reply(503, {"error": "Nano not set up yet (edit " + ENV_FILE + ")"})
+                return self._reply(503, {"error": "Pico not set up yet (edit " + ENV_FILE + ")"})
             cmds = clean(self._body(8000).decode("utf-8", "ignore").split("\n"))
             if not cmds:
                 return self._reply(400, {"error": "no valid commands"})
@@ -159,6 +159,6 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print("vseebox-control on :%d -> Nano %s:%d (%s)" % (
+    print("vseebox-control on :%d -> Pico %s:%d (%s)" % (
         LISTEN, ESP_HOST or "?", ESP_PORT, "ready" if configured() else "NOT CONFIGURED"), flush=True)
     ThreadingHTTPServer(("", LISTEN), Handler).serve_forever()

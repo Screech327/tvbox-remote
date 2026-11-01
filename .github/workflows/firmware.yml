@@ -1,0 +1,44 @@
+name: firmware
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths: ['firmware/**', '.github/workflows/firmware.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install arduino-cli
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+          arduino-cli core update-index
+          arduino-cli core install rp2040:rp2040@6.3.1
+
+      - name: Build
+        run: |
+          arduino-cli compile -b "rp2040:rp2040:rpipico2w:usbstack=tinyusb,flash=4194304_2097152" \
+            --output-dir out firmware/tvbox-remote
+          mkdir -p dist
+          cp out/tvbox-remote.ino.uf2 dist/tvbox-remote.uf2
+          cp out/tvbox-remote.ino.bin dist/tvbox-remote.bin
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tvbox-remote-firmware
+          path: dist/
+
+      - name: Attach to release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

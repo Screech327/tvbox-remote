@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Runs inside the camstream container (CT 120). Installs the control page on port 80.
-# Usage: install.sh <nano-ip> <token>     (both optional if /etc/vseebox-control.env already exists)
+# Installs the control page (port 80) on the same machine as server/stream. Run as root:
+#   sudo bash server/control/install.sh <pico-ip> <token>
+# <pico-ip>: the Pico's address (give it a fixed/reserved IP in your router)
+# <token>:   the token you typed on the Pico's setup page
+# Both are optional if /etc/vseebox-control.env already exists. Settings live in /etc/vseebox-control.env.
 set -euo pipefail
+[ "$(id -u)" = 0 ] || { echo "Run as root (sudo)."; exit 1; }
 export LC_ALL=C.UTF-8 LANG=C.UTF-8
 SRC="$(cd "$(dirname "$0")" && pwd)"
 ENV=/etc/vseebox-control.env

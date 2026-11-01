@@ -36,7 +36,7 @@
 #include <Adafruit_TinyUSB.h>
 #include "device/usbd_pvt.h"
 
-#define FW_VERSION "pico-5"
+#define FW_VERSION "pico-6"
 #define UDP_PORT 4210
 #define RELAY_PIN 15
 #define CFG_MAGIC 0x56534232UL
@@ -49,7 +49,7 @@ struct Config {
   char pass[65];
   char token[65];
   char host[33];
-  uint8_t usbId;      // 0 = XING WEI look-alike (default), 1 = generic Raspberry Pi ID
+  uint8_t usbId;      // 1 = generic Raspberry Pi ID (default), 0 = XING WEI 2.4G dongle look-alike
   uint8_t relayLow;   // 1 = relay board turns on with a LOW signal
   uint16_t pulseMs;   // how long the relay "presses" the button
 };
@@ -64,6 +64,7 @@ static void loadCfg() {
     memset(&cfg, 0, sizeof(cfg));
     strcpy(cfg.host, "vseebox-remote");
     cfg.pulseMs = 250;
+    cfg.usbId = 1;     // pico-6: generic ID by default (tested on vSeeBox); the look-alike is optional
   }
   cfg.ssid[32] = cfg.pass[64] = cfg.token[64] = cfg.host[32] = 0;
   if (!cfg.host[0]) strcpy(cfg.host, "vseebox-remote");
@@ -595,8 +596,8 @@ static void pageSetup() {
     "<input name=token required maxlength=64 autocapitalize=off autocorrect=off spellcheck=false value=\"" + esc(cfg.token) + "\">"
     "<label>Device name</label><input name=host maxlength=32 value=\"" + esc(cfg.host) + "\">"
     "<label>USB identity</label><select name=usbid>"
-    "<option value=0" + (cfg.usbId == 0 ? " selected" : "") + ">XING WEI 2.4G dongle look-alike (recommended)</option>"
-    "<option value=1" + (cfg.usbId == 1 ? " selected" : "") + ">Raspberry Pi (generic)</option></select>"
+    "<option value=1" + (cfg.usbId == 1 ? " selected" : "") + ">Raspberry Pi (generic) (recommended)</option>"
+    "<option value=0" + (cfg.usbId == 0 ? " selected" : "") + ">XING WEI 2.4G dongle look-alike</option></select>"
     "<label>Relay press length (ms)</label><input name=pulse type=number min=50 max=3000 value=" + String(cfg.pulseMs) + ">"
     "<label><input type=checkbox name=relaylow value=1" + (cfg.relayLow ? " checked" : "") + "> Relay board switches on LOW (only if the relay is stuck on)</label>"
     "<button class=p type=submit>Save and restart</button></form>"
