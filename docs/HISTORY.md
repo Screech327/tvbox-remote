@@ -43,15 +43,22 @@ README). The rack and Proxmox are just how this particular build is set up.
 
 With the box in the rack, its single HDMI output has to feed both the Cam Link and the TV (through the extender).
 
-1. **The OREI extender's loop-out** looked like the obvious answer. It gave **no picture**.
-2. **Anker HDMI switch (A83H1), used backwards** (one source, two outputs) worked, but you had to press its
-   button to flip between the TV and the capture card.
+1. **The OREI extender's loop-out** looked like the obvious answer. It gave the Cam Link **no picture**.
+   This was the **HDCP problem**: the box's output is copy-protected, and capture cards like the Cam Link refuse
+   copy-protected signals. The loop-out passed the protection straight through.
+2. **Anker HDMI switch (A83H1), used backwards** (one source, two outputs) fixed it, and the picture came through
+   to the Cam Link. The switch handles the copy-protection handshake with the box itself and passes a picture
+   the capture card accepts. It's the most likely explanation, though it isn't confirmed. The catch: you had to
+   press its button to flip between the TV and the capture card.
 3. The plan was to have the Pico press that button through a **relay** (GP15). The relay works and is still
    wired, but opening the Anker to solder onto the button wasn't appealing.
-4. **Current plan: an HDMI splitter** (ezcoo SP12H2 ordered). It has EDID modes and a downscaler, so both
-   outputs get the picture at once and nothing needs switching. *Status: being tested.*
+4. **Current plan: an HDMI splitter** (ezcoo SP12H2 ordered). Both outputs get the picture at once, so nothing
+   needs switching. It has EDID modes and a downscaler, and it lists HDCP handling, which matters given step 1.
+   *Status: being tested.*
 
-> TODO (Sam): describe the HDCP problem we hit and how it got resolved.
+**Lesson: anything between the box and the capture card has to deal with HDCP.** If your capture shows no
+picture (or a black or "no signal" screen) while the TV works fine, that's almost certainly the cause. A plain
+pass-through, like an extender's loop-out, won't fix it.
 
 ## Control: why a USB keyboard and mouse at all
 
@@ -74,12 +81,15 @@ The first controller was an Arduino Nano ESP32. It never became usable. The prob
    keyboard, mouse and media keys all had to share **one** USB interface, told apart by report IDs. Real
    keyboards and remote dongles use **separate** interfaces, and a boot keyboard is on its own. The box accepted
    the mouse but **ignored the keys**.
-2. **USB setup order.** Creating the HID objects inside `setup()` (after USB had already started) broke
+2. **No "point and click" mouse.** An early version also showed up as an absolute pointer (the kind a
+   touchscreen or graphics tablet uses, so a click lands exactly where you clicked on the picture). Android then
+   **ignored the keyboard** entirely. It was removed. The mouse is relative only, moved like a trackpad.
+3. **USB setup order.** Creating the HID objects inside `setup()` (after USB had already started) broke
    enumeration completely: Linux logged `usbhid probe failed -22`. They have to be globals.
-3. **Identity.** The Arduino core forces its own USB VID. Using the Espressif core with USB-CDC disabled made it
+4. **Identity.** The Arduino core forces its own USB VID. Using the Espressif core with USB-CDC disabled made it
    possible to copy the XING WEI keyboard-remote dongle's ID. Typing then worked, but keys stuck or repeated, it
    was laggy, and input stalled roughly every 20 seconds.
-4. **Blocking sends.** `SendReport()` fails instantly when the endpoint isn't ready, and otherwise blocks for up
+5. **Blocking sends.** `SendReport()` fails instantly when the endpoint isn't ready, and otherwise blocks for up
    to 100 ms. Sending every mouse step directly built up a **15-second backlog** and lost key releases, which
    caused the stuck keys. Coalescing mouse movement and waiting for the endpoint helped, but didn't fix the
    underlying problem.
