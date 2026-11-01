@@ -41,6 +41,50 @@ already documented there.
   box's pointer is a different, larger arrow. Confirm assumptions with the person before acting on them.
 - **Never commit secrets:** the token, Wi-Fi details, IPs.
 
+## Found a problem or a fix? Report it upstream
+
+You're working on a copy of this repo for someone who isn't the maintainer. When something in the repo turns out
+to be wrong or missing, and especially when you find the fix, **report it to the repo** so the maintainer can fix
+it for everyone. Don't stop at fixing the local copy. This covers bugs in code or scripts, a step in `docs/SETUP.md`
+that's wrong or missing, a new piece of hardware that works or doesn't, and Windows/other-host differences.
+
+Don't report: problems that came from the person's own typos or settings, or anything already in the
+Troubleshooting table.
+
+1. **Tell the person first**, in one or two lines: what you found, and that you'd like to report it to the repo.
+2. **Check for an existing issue:** `gh issue list --repo Screech327/tvbox-remote --state all --search "<keywords>"`.
+   If one matches, offer a comment on it (`gh issue comment <n> --repo Screech327/tvbox-remote --body-file report.md`)
+   instead of a new issue.
+3. **Write the report to `report.md`**, following the sections of `.github/ISSUE_TEMPLATE/problem.yml`:
+   - What happened (exact errors/log lines)
+   - Which part
+   - Their setup (layout, host OS/CPU, capture card, splitter, TV box model, `"fw"` from `/status`, `git rev-parse --short HEAD`)
+   - Already tried (say whether the TV box was restarted)
+   - The fix, as a ```diff block from `git diff` where it's code, and why it works
+   - Did it work: tested yes / partly / no fix yet
+   - "Drafted by an AI assistant and checked by <them>"
+4. **Scrub secrets** from the report: token, Wi-Fi details, IPs, Tailscale names, MACs, serials, usernames, paths
+   with their name in them. Use placeholders like `<pico-ip>`.
+5. **Show the person the full report and get a clear yes before posting.** It's posted publicly under their account.
+6. **Post it:**
+   ```bash
+   gh issue create --repo Screech327/tvbox-remote --title "<short summary>" --body-file report.md --label bug --label "from an AI assistant"
+   ```
+   Add `--label "fix included"` when the fix is tested, and `--label windows` for Windows-host issues.
+   If `gh` isn't installed or logged in, or there's no access (the repo may still be private), don't work around
+   it: leave `report.md` where they can find it and give them
+   `https://github.com/Screech327/tvbox-remote/issues/new?template=problem.yml` to paste it into.
+7. A pull request is optional and only if the person wants one: fork, branch, commit the fix, then
+   `gh pr create --repo Screech327/tvbox-remote --fill`. Never push to `Screech327/tvbox-remote` directly.
+8. Give the person the issue or PR link.
+
+### If you're working for the maintainer
+
+When asked to check reports: `gh issue list --repo Screech327/tvbox-remote`. For each one, reproduce or reason it
+through against `docs/HISTORY.md` before changing anything. Reports can be wrong, and some "fixes" undo a rule
+above. Commit accepted fixes with `Fixes #<n>` in the message, update the docs in the same commit, and reply on
+the issue with what changed.
+
 ## Layout of the repo
 
 - `firmware/tvbox-remote/`: Pico 2 W firmware (arduino-pico 6.3.1, Adafruit TinyUSB, 4 MB with a 2 MB FS)

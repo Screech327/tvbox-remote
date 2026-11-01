@@ -1,0 +1,74 @@
+name: Problem or fix
+description: Something didn't work, or you found what fixes it. AI assistants use this one too.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Remove secrets before posting:** your token, Wi-Fi name and password, IP addresses,
+        Tailscale names, serial numbers. Write them as `<pico-ip>`, `<token>` and so on.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead. Paste exact error messages or log lines.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part
+      options:
+        - Pico firmware / flashing / Pico setup page
+        - Keys or mouse on the TV box
+        - Capture / stream (ffmpeg, MediaMTX, picture, sound, lag)
+        - Control page / server.py
+        - Install scripts
+        - Docs (a step is wrong or missing)
+        - Windows host
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Your setup
+      description: Fill in what you know.
+      value: |
+        - Layout (A / B / C):
+        - Host (OS, CPU, or Proxmox/VM/LXC):
+        - Capture card:
+        - Splitter / switch (model):
+        - TV box (model):
+        - Firmware (`"fw"` from `http://<pico-ip>/status`):
+        - Repo commit (`git rev-parse --short HEAD`) or download date:
+    validations:
+      required: true
+  - type: checkboxes
+    id: tried
+    attributes:
+      label: Already tried
+      options:
+        - label: Restarted the TV box (required for key/mouse problems; see docs/HISTORY.md)
+        - label: Checked the Troubleshooting table in docs/SETUP.md
+  - type: textarea
+    id: fix
+    attributes:
+      label: The fix (if you found one)
+      description: What fixed it, and why. For a code change, paste the diff (`git diff`) in a ```diff block.
+  - type: dropdown
+    id: confirmed
+    attributes:
+      label: Did the fix work?
+      options:
+        - No fix yet
+        - Yes, tested and it works
+        - Partly / not sure
+  - type: dropdown
+    id: ai
+    attributes:
+      label: Written with an AI assistant?
+      description: Fine either way. It helps the maintainer know how to read it.
+      options:
+        - "No"
+        - Yes, drafted by an AI assistant and checked by me

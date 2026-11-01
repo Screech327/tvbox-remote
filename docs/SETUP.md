@@ -28,7 +28,7 @@ See `docs/HISTORY.md`.
 | Raspberry Pi Pico 2 W | Must be the **2 W** (Wi-Fi + RP2350). About $7. |
 | Micro-USB **data** cable | For the first flash only. Charge-only cables won't show the drive. |
 | USB HDMI capture card | Tested: Elgato Cam Link 4K. Use a USB 3 port if the card is USB 3. |
-| Host computer | Any always-on Linux machine: an old laptop or mini PC (x86), a Raspberry Pi 5, or a VM/LXC on a home server. Needs a USB port for the capture card. |
+| Host computer | Any always-on Linux machine: an old laptop or mini PC (x86), a Raspberry Pi 5, or a VM/LXC on a home server. Needs a USB 3 port for the capture card. Cheap option: a used business mini PC with an 8th-gen Intel i5 or newer (Lenovo ThinkCentre Tiny, HP EliteDesk Mini, Dell OptiPlex Micro). |
 | HDMI splitter (layouts B/C) | Tested model: *to be confirmed*. |
 | HDMI cables | One per connection in your layout. |
 

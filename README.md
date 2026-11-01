@@ -11,14 +11,17 @@ Watch and control an Android TV box from anywhere, in a browser, on a computer o
 Tested on a **vSeeBox**. It should work with most Android TV boxes that accept a USB keyboard and mouse.
 
 > **Status: work in progress (private).** This is the reference build from one home lab. Packaging for
-> everyone else is next: one-command Docker setup, automatic Pico discovery, prebuilt firmware, setup guides and
-> diagrams for each layout.
+> everyone else is next: a Windows host version (no Linux box needed), one-command Docker setup and automatic
+> Pico discovery.
 
 ## Set it up
 
 **Follow [docs/SETUP.md](docs/SETUP.md).** It goes from parts to watching on your phone, with a check after every
 step and a troubleshooting table. Using an AI assistant? Point it at this repo. [CLAUDE.md](CLAUDE.md) tells it
 how to walk you through the setup and which mistakes to avoid.
+
+**Something not working, or found a fix?** Open an issue (*Issues → New issue → Problem or fix*). See
+[CONTRIBUTING.md](CONTRIBUTING.md). AI assistants following CLAUDE.md will offer to write and post it for you.
 
 ## What's in here
 

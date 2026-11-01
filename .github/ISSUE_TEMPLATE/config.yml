@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Setup guide and troubleshooting
+    url: https://github.com/Screech327/tvbox-remote/blob/main/docs/SETUP.md#troubleshooting
+    about: Most problems are already in the troubleshooting table.
+  - name: Why things are the way they are
+    url: https://github.com/Screech327/tvbox-remote/blob/main/docs/HISTORY.md
+    about: Read this before "fixing" something that looks odd. It may be deliberate.
