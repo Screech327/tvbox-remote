@@ -23,7 +23,7 @@ already documented there.
 4. **The rest can run on the host** if you have shell access: `server/stream/install.sh` and
    `server/control/install.sh <pico-ip> <token>`. Otherwise give the exact commands one at a time, as separate
    code blocks.
-5. Firmware: use the prebuilt `.uf2`/`.bin` from the Actions artifacts or Releases. Only build from source if
+5. Firmware: use the prebuilt `.uf2`/`.bin` from the latest Release (https://github.com/Screech327/tvbox-remote/releases/latest). Only build from source if
    asked; `firmware/README.md` has the exact board options, and they matter.
 
 ## Rules learned the hard way (see docs/HISTORY.md)

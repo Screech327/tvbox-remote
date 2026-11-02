@@ -1,13 +1,16 @@
 # Pico 2 W firmware
 
-The Pico plugs into the TV box's USB port and shows up as a **USB keyboard** (interface 0, boot keyboard) plus a
-**mouse + media keys** device (interface 1). It joins your Wi-Fi and takes commands over UDP port 4210 from the
+The Pico plugs into the TV box's USB port and shows up as a **USB keyboard** (boot keyboard) plus a
+**mouse + media keys** device, laid out like a common keyboard-remote dongle (details in `docs/HISTORY.md`). It joins your Wi-Fi and takes commands over UDP port 4210 from the
 control page server.
 
 ## Easiest: use a prebuilt file
 
-Every push to `main` builds the firmware automatically: open the **Actions** tab, then the latest **firmware**
-run, then **Artifacts**. Tagged releases attach the files to the **Releases** page.
+Download both files from the latest release:
+**[Releases → latest](https://github.com/Screech327/tvbox-remote/releases/latest)**.
+
+(Every push to `main` also builds the firmware: **Actions** tab → latest **firmware** run → **Artifacts**. Those
+need a GitHub login and expire after 90 days, so use the release unless you need something newer.)
 
 - `tvbox-remote.uf2`: for the **first** flash, by USB drag-and-drop
 - `tvbox-remote.bin`: for **updates** over Wi-Fi at `http://<pico-ip>/update`
