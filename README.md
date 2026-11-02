@@ -10,9 +10,9 @@ Watch and control an Android TV box from anywhere, in a browser, on a computer o
 
 Tested on a **vSeeBox**. It should work with most Android TV boxes that accept a USB keyboard and mouse.
 
-> **Status: work in progress (private).** This is the reference build from one home lab. Packaging for
-> everyone else is next: a Windows host version (no Linux box needed), one-command Docker setup and automatic
-> Pico discovery.
+> **Status:** working and in daily use on the reference build (Linux host, Elgato Cam Link 4K, ezcoo SP12H2
+> splitter, vSeeBox). Next up: a Windows host version (no Linux box needed), a one-command Docker setup and
+> automatic Pico discovery. Found a problem? See below.
 
 ## Set it up
 
@@ -48,8 +48,10 @@ how to walk you through the setup and which mistakes to avoid.
 
 ## Quick facts
 
-- Pico setup: on first boot it opens a Wi-Fi network called `vSeeBox-Remote-Setup`. Join it and enter your Wi-Fi
-  and a token (password).
+- Pico setup: on first boot it opens a Wi-Fi network called `TVBox-Remote-Setup` (`vSeeBox-Remote-Setup` on
+  firmware before pico-6). Join it and enter your Wi-Fi and a token (password).
 - Pico pages: `/` (test remote), `/setup`, `/update` (firmware upload), `/status`, `/usblog`.
 - If the TV box starts acting strange (laggy, wrong directions, stuck keys), **restart the box first.** See
   [docs/HISTORY.md](docs/HISTORY.md).
+- Some internal names (the `vseebox-control` service, the `/vseebox` stream path) come from the original build.
+  They're kept so existing installs keep working.

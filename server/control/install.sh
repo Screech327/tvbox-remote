@@ -18,12 +18,14 @@ install -m 644 "$SRC/server.py" "$SRC/index.html" /opt/vseebox-control/
 
 if [ -n "${1:-}" ] || [ ! -f "$ENV" ]; then
   cat > "$ENV" <<ENVFILE
-# vSeeBox control page settings. After editing: systemctl restart vseebox-control
+# TV box control page settings. After editing: systemctl restart vseebox-control
 ESP_HOST=${1:-}
 ESP_TOKEN=${2:-}
 ESP_PORT=4210
 PORT=80
 WHEP_URL=http://127.0.0.1:8889/vseebox/whep
+# Name shown on the page and the phone home-screen icon
+BOX_NAME=TV Box
 ENVFILE
 fi
 chown root:vsbctl "$ENV"; chmod 640 "$ENV"

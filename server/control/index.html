@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>vSeeBox Control</title>
+<title>TV Box Control</title>
 <meta name="theme-color" content="#0e1013">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -117,9 +117,9 @@ kbd{font:11.5px ui-monospace,Consolas,monospace;background:var(--panel2);border:
 </head>
 <body>
 <header>
-  <h1>vSeeBox</h1>
+  <h1>TV Box</h1>
   <span class="pill" title="Video stream from the Cam Link"><span class="dot" id="sDot"></span><span id="sTxt">Stream: connecting</span></span>
-  <span class="pill" title="Pico 2 W plugged into the vSeeBox"><span class="dot" id="rDot"></span><span id="rTxt">Remote: checking</span></span>
+  <span class="pill" title="Pico 2 W plugged into the TV box"><span class="dot" id="rDot"></span><span id="rTxt">Remote: checking</span></span>
 </header>
 
 <main>
@@ -140,9 +140,9 @@ kbd{font:11.5px ui-monospace,Consolas,monospace;background:var(--panel2);border:
       </div>
       <span id="speedWrap" hidden><span class="lbl">Speed</span><input type="range" id="speed" min="0.3" max="3" step="0.1" value="1.2"></span>
       <span class="spacer"></span>
-      <button class="btn" id="reboot" title="Restart the vSeeBox (Power → Reboot)">Restart box</button>
+      <button class="btn" id="reboot" title="Restart the TV box (Power → Reboot)">Restart box</button>
       <button class="btn" id="unstick" title="Let go of any key or button that got stuck">Unstick</button>
-      <button class="btn" id="kb" aria-pressed="true" title="Send keys you press to the vSeeBox"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span>Keyboard on</span></button>
+      <button class="btn" id="kb" aria-pressed="true" title="Send keys you press to the TV box"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span>Keyboard on</span></button>
       <button class="btn" id="snd" title="Sound"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path id="sndWave" d="M23 9l-6 6M17 9l6 6"/></svg><span>Sound off</span></button>
       <button class="btn" id="fs" title="Full screen"><svg viewBox="0 0 24 24"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg></button>
     </div>
@@ -539,7 +539,7 @@ kbd{font:11.5px ui-monospace,Consolas,monospace;background:var(--panel2);border:
     send('m power');
     setTimeout(() => send('k right'), 1500);
     setTimeout(() => send('k enter'), 2300);
-    toast('Restarting the vSeeBox… the picture comes back in about a minute');
+    toast('Restarting the TV box… the picture comes back in about a minute');
   };
   window.addEventListener('blur', () => send('x'));
 })();

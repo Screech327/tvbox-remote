@@ -82,6 +82,7 @@ sudo bash server/control/install.sh <pico-ip> <token>
 highlight move on the stream.
 
 Settings are in `/etc/vseebox-control.env`. After editing: `sudo systemctl restart vseebox-control`.
+To show your box's name on the page instead of "TV Box", set `BOX_NAME=` there.
 
 ## 6. Watch from anywhere (Tailscale)
 
@@ -102,7 +103,7 @@ Settings are in `/etc/vseebox-control.env`. After editing: `sudo systemctl resta
 - **Buttons under the picture:**
   - **Restart box** (click twice): restarts the TV box
   - **Unstick**: releases any stuck keys
-- **vSeeBox player:** press **Up** to open Server / Quality / Subtitle. Use **OK** to pause and play; the
+- **vSeeBox (the tested box), in its video player:** press **Up** to open Server / Quality / Subtitle. Use **OK** to pause and play; the
   Play/Pause button doesn't work in this player.
 
 ## Troubleshooting
@@ -113,7 +114,7 @@ Settings are in `/etc/vseebox-control.env`. After editing: `sudo systemctl resta
 | Capture picture is black, but the TV works | **HDCP.** The capture card is getting copy-protected video. The device in front of the card, the splitter or switch, decides what the card receives. A loop-out passes the protection straight through. |
 | Back does nothing | Use the page's Back / Esc / right-click, which send the media Back key. Plain Backspace only works as Back for some remotes' own USB IDs. |
 | The mouse pointer isn't visible | It's parked at a screen edge. Move the mouse toward the middle of the picture. Video players also hide it while paused. |
-| Pico LED blinking slowly | It's in setup mode: no settings, or no Wi-Fi for 10 minutes. Join `vSeeBox-Remote-Setup` and save again. |
+| Pico LED blinking slowly | It's in setup mode: no settings, or no Wi-Fi for 10 minutes. Join `TVBox-Remote-Setup` (`vSeeBox-Remote-Setup` on firmware before pico-6) and save again. |
 | Pico LED blinking fast | Joining Wi-Fi. If it stays that way, check the 2.4 GHz network and the password. |
 | Control page: "Remote" pill red | Wrong Pico IP or token in `/etc/vseebox-control.env`, or the Pico is offline. Test: `http://<pico-ip>/status`. |
 | Lists overshoot when holding a key | Update to the latest control page. It holds keys for real instead of repeating taps. |

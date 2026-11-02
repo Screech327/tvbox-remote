@@ -6,7 +6,7 @@ lessons apply to any Android TV box, not only the vSeeBox it was built on.
 
 ## The goal
 
-Watch and control a vSeeBox (an Android-based IPTV box) from anywhere, including from a laptop or phone while
+Watch and control a vSeeBox (an Android TV box) from anywhere, including from a laptop or phone while
 traveling. The box was only watchable on the living room TV.
 
 "Control" had a specific meaning: **point, click and type**, plus the normal remote buttons (arrows, OK, Back,

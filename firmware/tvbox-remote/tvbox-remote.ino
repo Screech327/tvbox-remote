@@ -1,12 +1,15 @@
 /*
-  vSeeBox remote — Raspberry Pi Pico 2 W                                   firmware "pico-1"
+  tvbox-remote — Raspberry Pi Pico 2 W                         (version: FW_VERSION below)
 
-  Plugs into a vSeeBox USB port and shows up the way the XING WEI keyboard-remote dongle does:
-    USB interface 0: a plain boot keyboard (no report IDs)
-    USB interface 1: mouse (report 1) + media/consumer keys (report 2)
-  It takes commands over Wi-Fi and also pulses a relay on GP15 (the Anker HDMI switch button).
+  Plugs into an Android TV box's USB port (tested on a vSeeBox) and shows up as a USB keyboard + mouse,
+  laid out like the XING WEI keyboard-remote dongle (see the USB section below):
+    USB interfaces 0-1: a dummy microphone (the dongle has one)
+    USB interface 2:    a plain boot keyboard (no report IDs)
+    USB interface 3:    mouse (report 1) + media/consumer keys (report 2) + system/vendor reports
+  USB identity: generic Raspberry Pi ID by default; the dongle's own ID is optional on /setup.
+  It takes commands over Wi-Fi. It can also pulse a relay on GP15 (used by an old HDMI-switch setup).
 
-  First boot: no settings yet, so it opens a Wi-Fi network called "vSeeBox-Remote-Setup".
+  First boot: no settings yet, so it opens a Wi-Fi network called "TVBox-Remote-Setup".
   Join it, a setup page opens (or browse to http://192.168.42.1), enter Wi-Fi + token, Save.
   Hold the white BOOTSEL button for 5 seconds while it runs to wipe the settings and start setup again.
 
@@ -19,7 +22,7 @@
     mk <name>       media key sent as a keyboard key instead (fallback test)
     rel <dx> <dy>   move the mouse            rb|b <btn> <0|1>  mouse button (1 left, 2 right, 3 middle)
     w <steps>       scroll wheel (+ up, - down)
-    sw [ms]         pulse the relay (presses the Anker switch button)
+    sw [ms]         pulse the relay on GP15 (optional; e.g. to press an HDMI switch button)
     ping            reply "pong"       usb  reply USB state       stats  reset counters      reboot
 
   Nothing here blocks: commands become USB reports in two queues (one per interface) that drain as fast
@@ -44,7 +47,7 @@ extern "C" void usbdlog_setup(tusb_control_request_t const* r);
 #define UDP_PORT 4210
 #define RELAY_PIN 15
 #define CFG_MAGIC 0x56534232UL
-#define SETUP_SSID "vSeeBox-Remote-Setup"
+#define SETUP_SSID "TVBox-Remote-Setup"
 
 // ---------------------------------------------------------------- settings (flash)
 struct Config {
@@ -66,12 +69,12 @@ static void loadCfg() {
   haveCfg = cfg.magic == CFG_MAGIC && cfg.ssid[0] && cfg.token[0];
   if (cfg.magic != CFG_MAGIC) {
     memset(&cfg, 0, sizeof(cfg));
-    strcpy(cfg.host, "vseebox-remote");
+    strcpy(cfg.host, "tvbox-remote");
     cfg.pulseMs = 250;
     cfg.usbId = 1;     // pico-6: generic ID by default (tested on vSeeBox); the look-alike is optional
   }
   cfg.ssid[32] = cfg.pass[64] = cfg.token[64] = cfg.host[32] = 0;
-  if (!cfg.host[0]) strcpy(cfg.host, "vseebox-remote");
+  if (!cfg.host[0]) strcpy(cfg.host, "tvbox-remote");
   if (cfg.pulseMs < 50 || cfg.pulseMs > 3000) cfg.pulseMs = 250;
 }
 static void saveCfg() {
@@ -86,11 +89,11 @@ static void wipeCfg() {
 }
 
 // ---------------------------------------------------------------- USB
-// pico-3: byte-for-byte copy of the XING WEI 2.4G dongle (1915:1025) as captured with lsusb on the Omen:
+// pico-3: byte-for-byte copy of the XING WEI 2.4G dongle (1915:1025) as captured with lsusb on a Linux PC:
 //   interface 0 = audio control ("Mic Device"), 1 = audio streaming (16 kHz mic, iso EP 0x83)
 //   interface 2 = boot keyboard, EP 0x81, 8-byte packets
 //   interface 3 = boot-mouse interface carrying mouse (ID 1), consumer (ID 2), system (ID 3), vendor (ID 8/4), EP 0x82, 32-byte packets
-// The vSeeBox ignores keyboards with any other identity, so we match it exactly.
+// The layout is copied exactly; the USB ID can be the dongle's or a generic one (both work on the vSeeBox).
 enum { RID_MOUSE = 1, RID_CONSUMER = 2 };
 static uint8_t const descKb[] = {   // 65 bytes, from /sys/bus/hid/devices/0003:1915:1025.000B/report_descriptor
   0x05,0x01,0x09,0x06,0xa1,0x01,0x05,0x07,0x19,0xe0,0x29,0xe7,0x15,0x00,0x25,0x01,
@@ -205,7 +208,7 @@ extern "C" const usbd_class_driver_t* usbd_app_driver_get_cb(uint8_t* count) { *
 static uint8_t const ascii2kc[128][2] = { HID_ASCII_TO_KEYCODE };
 
 // pico-4: log of everything the host does to us (resets, sleeps, control requests, report pickups),
-// so we can see what the vSeeBox is doing without access to it. Shown at /usblog.
+// so we can see what the TV box is doing without access to it. Shown at /usblog.
 struct ULog { uint32_t ms; uint8_t type; uint8_t a, b; uint16_t c, d, e; };
 // type: 1 bus reset, 2 unplug, 3 suspend, 4 resume, 5 xfer error, 6 EP0 stall, 7 report picked up (a=ep),
 //       8 report queued (a=ep, c=first key/usage), 9 setup (a=bmRequestType b=bRequest c=wValue d=wIndex e=wLength)
@@ -228,7 +231,7 @@ static void startUsb() {
   if (cfg.usbId == 1) {
     TinyUSBDevice.setID(0x2E8A, 0x10F0);
     TinyUSBDevice.setManufacturerDescriptor("Raspberry Pi");
-    TinyUSBDevice.setProductDescriptor("vSeeBox Remote");
+    TinyUSBDevice.setProductDescriptor("TV Box Remote");
   } else {
     TinyUSBDevice.setID(0x1915, 0x1025);
     TinyUSBDevice.setManufacturerDescriptor("XING WEI 2.4G USB");
@@ -269,8 +272,8 @@ uint32_t kbNext = 0, mcNext = 0, stallSince = 0, lastWake = 0;
 uint32_t stSent = 0, stDropped = 0, stWakeups = 0, stOverflow = 0;
 uint32_t lastActivity = 0;
 
-// pico-2: every report goes out more than once (a few ms apart). The vSeeBox's USB appears to drop the
-// odd report; a repeated identical report is ignored by the host, so this only protects against loss.
+// pico-2: optionally send every report more than once (a few ms apart). It turned out nothing gets lost
+// (the box picks up every report within 1 ms), so the default is 1 copy; kept as a tunable (see tm).
 #define DUP_GAP_MS 4
 // Live-tunable (command: tm <tap_ms> <tap_gap> <type_ms> <type_gap> <media_ms> <copies>)
 uint16_t tapMs = 200, tapGap = 80, typeMs = 100, typeGap = 50, mediaMs = 300; uint8_t gCopies = 1;
@@ -500,7 +503,7 @@ String runCommand(String line) {
     tapConsumer(u);
     return "ok";
   }
-  if (cmd == "mk") {             // media keys as keyboard keys (what the Nano v8 sent)
+  if (cmd == "mk") {             // media keys as keyboard keys (what the earlier Arduino Nano attempt sent)
     if (rest == "back") tapUsage(0x29, 0);
     else if (rest == "home") tapUsage(0x28, KEYBOARD_MODIFIER_LEFTGUI);
     else if (rest == "menu") tapUsage(0x76, 0);
@@ -585,14 +588,14 @@ static const char CSS[] = "<meta charset=utf-8><meta name=viewport content='widt
 static bool needAuth() {
   if (portal) return false;
   if (web.authenticate("admin", cfg.token)) return false;
-  web.requestAuthentication(BASIC_AUTH, "vSeeBox remote", "User: admin   Password: your token");
+  web.requestAuthentication(BASIC_AUTH, "TV box remote", "User: admin   Password: your token");
   return true;
 }
 
 static void pageSetup() {
   if (needAuth()) return;
-  String h = String("<!doctype html><html><head><title>vSeeBox remote setup</title>") + CSS + "</head><body>"
-    "<h1>vSeeBox remote · setup</h1><form method=post action=/setup>"
+  String h = String("<!doctype html><html><head><title>TV box remote setup</title>") + CSS + "</head><body>"
+    "<h1>TV box remote · setup</h1><form method=post action=/setup>"
     "<label>Wi-Fi name</label><input name=ssid required maxlength=32 autocapitalize=off autocorrect=off spellcheck=false value=\"" + esc(cfg.ssid) + "\">"
     "<label>Wi-Fi password" + (cfg.pass[0] ? " (leave blank to keep the saved one)" : "") + "</label>"
     "<input name=pass type=password maxlength=64>"
@@ -620,7 +623,7 @@ static void saveSetup() {
   host.toLowerCase();
   String h2;
   for (unsigned i = 0; i < host.length(); i++) { char c = host[i]; if (isalnum(c) || c == '-') h2 += c; }
-  if (!h2.length()) h2 = "vseebox-remote";
+  if (!h2.length()) h2 = "tvbox-remote";
   strlcpy(cfg.ssid, ssid.c_str(), sizeof(cfg.ssid));
   if (pass.length()) strlcpy(cfg.pass, pass.c_str(), sizeof(cfg.pass));
   strlcpy(cfg.token, token.c_str(), sizeof(cfg.token));
@@ -636,14 +639,14 @@ static void saveSetup() {
   rebootAt = millis() + 1500;
 }
 
-static const char REMOTE[] = R"HTML(<h1>vSeeBox remote</h1><div id=st><small>…</small></div>
+static const char REMOTE[] = R"HTML(<h1>TV box remote</h1><div id=st><small>…</small></div>
 <input id=tok placeholder="Token" type=password autocapitalize=off autocorrect=off spellcheck=false>
 <div class=g>
 <button data-c="m back">Back</button><button data-c="k up">▲</button><button data-c="m home">Home</button>
 <button data-c="k left">◀</button><button data-c="k ok">OK</button><button data-c="k right">▶</button>
 <button data-c="m voldown">Vol −</button><button data-c="k down">▼</button><button data-c="m volup">Vol +</button>
 <button data-c="m prev">⏮</button><button data-c="m play">⏯</button><button data-c="m next">⏭</button>
-<button data-c="sw">Anker switch</button><button data-c="x">Unstick</button><button data-c="usb">USB?</button>
+<button data-c="sw">Relay</button><button data-c="x">Unstick</button><button data-c="usb">USB?</button>
 </div>
 <input id=txt placeholder="Type text, then Enter"><div id=log></div>
 <p><a href=/setup>Settings</a> · <a href=/update>Firmware update</a> · <a href=/status>Status JSON</a></p>
@@ -659,7 +662,7 @@ fetch('/status').then(r=>r.json()).then(j=>{document.getElementById('st').innerH
 
 static void pageRoot() {
   if (portal) { pageSetup(); return; }
-  web.send(200, "text/html", String("<!doctype html><html><head><title>vSeeBox remote</title>") + CSS + "</head><body>" + REMOTE + "</body></html>");
+  web.send(200, "text/html", String("<!doctype html><html><head><title>TV box remote</title>") + CSS + "</head><body>" + REMOTE + "</body></html>");
 }
 
 static void pageStatus() {

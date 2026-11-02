@@ -20,13 +20,13 @@ run, then **Artifacts**. Tagged releases attach the files to the **Releases** pa
 
 ### First-time setup (no computer needed)
 
-1. The Pico's LED blinks slowly and it opens a Wi-Fi network called **vSeeBox-Remote-Setup**. Join it from a
+1. The Pico's LED blinks slowly and it opens a Wi-Fi network called **TVBox-Remote-Setup** (**vSeeBox-Remote-Setup** on firmware before pico-6). Join it from a
    phone. A setup page opens; if it doesn't, browse to `http://192.168.42.1`.
 2. Enter:
    - your **Wi-Fi name and password** (2.4 GHz only, the Pico can't use 5 GHz)
    - a **token**: any password you make up. The control page server needs the same one.
 3. Tap **Save and restart**. The LED goes solid once it's on your Wi-Fi.
-4. In your router, find the device named **vseebox-remote** and give it a **fixed (reserved) IP**.
+4. In your router, find the device named **tvbox-remote** (**vseebox-remote** before pico-6) and give it a **fixed (reserved) IP**.
 
 To start over: hold **BOOTSEL for 5 seconds** while it's running. That wipes the settings and reopens setup.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""vSeeBox control page.
+"""TV box control page (tvbox-remote).
 
 Serves one page that shows the live stream and turns clicks, keys and buttons into
 commands for the Pico 2 W plugged into the TV box.
@@ -11,6 +11,7 @@ commands for the Pico 2 W plugged into the TV box.
 
 Settings come from /etc/vseebox-control.env (see install.sh). Standard library only.
 """
+import html
 import json
 import os
 import socket
@@ -46,6 +47,7 @@ ESP_PORT = int(CFG.get("ESP_PORT", "4210"))
 TOKEN = CFG.get("ESP_TOKEN", "")
 LISTEN = int(CFG.get("PORT", "80"))
 WHEP = CFG.get("WHEP_URL", "http://127.0.0.1:8889/vseebox/whep")
+BOX_NAME = CFG.get("BOX_NAME", "TV Box")   # shown on the page and on the phone home-screen icon
 
 _sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 _lock = threading.Lock()
@@ -118,14 +120,19 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path in ("/", "/index.html"):
             with open(os.path.join(HERE, "index.html"), "rb") as f:
-                return self._reply(200, f.read(), "text/html; charset=utf-8")
+                page = f.read()
+            if BOX_NAME != "TV Box":
+                name = html.escape(BOX_NAME).encode()
+                page = page.replace(b"<title>TV Box Control</title>", b"<title>" + name + b" Control</title>")
+                page = page.replace(b"<h1>TV Box</h1>", b"<h1>" + name + b"</h1>")
+            return self._reply(200, page, "text/html; charset=utf-8")
         if path == "/api/status":
             if not configured():
                 return self._reply(200, {"configured": False, "esp": {"ok": False, "ms": None,
                                          "reply": "ESP_HOST / ESP_TOKEN not set in " + ENV_FILE}})
             return self._reply(200, {"configured": True, "host": ESP_HOST, "esp": ping()})
         if path == "/manifest.json":   # lets phones "Add to Home screen" and open it full screen, no browser bar
-            return self._reply(200, {"name": "vSeeBox", "short_name": "vSeeBox", "start_url": "/", "display": "fullscreen",
+            return self._reply(200, {"name": BOX_NAME, "short_name": BOX_NAME, "start_url": "/", "display": "fullscreen",
                                      "orientation": "landscape", "background_color": "#000000", "theme_color": "#0e1013"},
                                "application/manifest+json")
         if path == "/healthz":
