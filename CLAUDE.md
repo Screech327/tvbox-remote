@@ -71,7 +71,7 @@ Troubleshooting table.
    gh issue create --repo Screech327/tvbox-remote --title "<short summary>" --body-file report.md --label bug --label "from an AI assistant"
    ```
    Add `--label "fix included"` when the fix is tested, and `--label windows` for Windows-host issues.
-   If `gh` isn't installed or logged in, or there's no access (the repo may still be private), don't work around
+   If `gh` isn't installed or logged in, or there's no access, don't work around
    it: leave `report.md` where they can find it and give them
    `https://github.com/Screech327/tvbox-remote/issues/new?template=problem.yml` to paste it into.
 7. A pull request is optional and only if the person wants one: fork, branch, commit the fix, then

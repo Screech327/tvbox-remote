@@ -28,5 +28,4 @@ CLI, or no access), it saves the report as a file and gives you a link to paste 
 
 ## Access
 
-While the repo is private, you need to be added as a collaborator to open issues. Ask the maintainer. Once it's
-public, anyone with a GitHub account can.
+Anyone with a GitHub account can open issues and pull requests.
