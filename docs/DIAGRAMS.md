@@ -129,3 +129,7 @@ flowchart LR
     PICO -- USB --> BOX
     PICO -. Wi-Fi .- GW
 ```
+
+## Old setup (retired)
+
+The build used an Anker HDMI switch before the splitter: [archive/anker-switch-setup.md](archive/anker-switch-setup.md).

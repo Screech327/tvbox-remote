@@ -35,6 +35,7 @@ how to walk you through the setup and which mistakes to avoid.
 | `docs/SETUP.md` | **Step-by-step setup guide** |
 | `docs/DIAGRAMS.md` | Which layout you need, how it all connects, and the reference home-lab build |
 | `docs/HISTORY.md` | **Why everything is the way it is**: what was tried, what broke, lessons learned |
+| `docs/archive/` | Retired setups, kept for history (the Anker HDMI switch build) |
 
 ## Parts (reference build)
 

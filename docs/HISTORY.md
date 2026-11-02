@@ -59,7 +59,8 @@ With the box in the rack, its single HDMI output has to feed both the Cam Link a
 4. **An HDMI splitter: ezcoo SP12H2 (1x2). This works.** Both outputs get the picture at once, so nothing needs
    switching: the TV and the Cam Link (1080p60, with sound) run at the same time. It worked on its default settings
    (EDID on Copy, downscaler off on both outputs). The Anker and the relay came out of the chain. The relay code
-   (`sw`, GP15) is still in the firmware, but nothing needs it.
+   (`sw`, GP15) is still in the firmware, but nothing needs it. The old setup, with its wiring and parts list, is
+   kept in [archive/anker-switch-setup.md](archive/anker-switch-setup.md).
 
 **Lesson: anything between the box and the capture card has to deal with HDCP.** If your capture shows no
 picture (or a black or "no signal" screen) while the TV works fine, that's almost certainly the cause. A plain
@@ -150,6 +151,8 @@ page has a Restart box button now.
 - **Back sends the media Back key** (AC Back, `0x0224`). Plain Backspace only works as Back for the dongle's own
   USB ID. With the Pico's generic ID it just deletes text.
 - **In the video player, Up opens Server / Quality / Subtitle.** That's how you switch to an English server.
+- **In the video player, OK pauses and plays.** The media Play/Pause key does nothing there (found Nov 2, 2026).
+- **The Switch HDMI button is gone.** It drove the relay for the old Anker switch, which the splitter replaced.
 - **Restart box:**
   - A **short** Power press opens Sleep / Shut down / Reboot, with **Shut down** selected and a countdown that
     runs it. The button presses Power, then Right, then OK, well before the countdown ends. It needs a second

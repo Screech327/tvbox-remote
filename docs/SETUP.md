@@ -102,8 +102,8 @@ Settings are in `/etc/vseebox-control.env`. After editing: `sudo systemctl resta
 - **Buttons under the picture:**
   - **Restart box** (click twice): restarts the TV box
   - **Unstick**: releases any stuck keys
-  - **Switch HDMI**: only for the optional relay
-- **vSeeBox player:** press **Up** to open Server / Quality / Subtitle.
+- **vSeeBox player:** press **Up** to open Server / Quality / Subtitle. Use **OK** to pause and play; the
+  Play/Pause button doesn't work in this player.
 
 ## Troubleshooting
 

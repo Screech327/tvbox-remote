@@ -140,7 +140,6 @@ kbd{font:11.5px ui-monospace,Consolas,monospace;background:var(--panel2);border:
       </div>
       <span id="speedWrap" hidden><span class="lbl">Speed</span><input type="range" id="speed" min="0.3" max="3" step="0.1" value="1.2"></span>
       <span class="spacer"></span>
-      <button class="btn" id="hdmi" title="Press the Anker switch button (TV ⇄ stream)">Switch HDMI</button>
       <button class="btn" id="reboot" title="Restart the vSeeBox (Power → Reboot)">Restart box</button>
       <button class="btn" id="unstick" title="Let go of any key or button that got stuck">Unstick</button>
       <button class="btn" id="kb" aria-pressed="true" title="Send keys you press to the vSeeBox"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span>Keyboard on</span></button>
@@ -526,7 +525,6 @@ kbd{font:11.5px ui-monospace,Consolas,monospace;background:var(--panel2);border:
     toast('Sent “' + v + '”');
   });
   $('unstick').onclick = () => { send('x'); toast('Released all keys and buttons'); };
-  $('hdmi').onclick = () => { send('sw'); toast('Pressed the Anker switch'); };
   // Restart: Power opens Sleep / Shut down / Reboot with "Shut down" selected and a countdown that runs it,
   // so move right to Reboot and press OK quickly. Needs a second click within 4 s, so it can't happen by accident.
   let rbArm = 0, rbT;

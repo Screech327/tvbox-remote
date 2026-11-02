@@ -88,6 +88,6 @@ Send UDP to port 4210: `<TOKEN> <command>`. Several commands go one per line, wi
 | `rel <dx> <dy>` | move the mouse |
 | `rb <1/2/3> <0/1>` | mouse button up/down (left/right/middle) |
 | `w <n>` | scroll wheel |
-| `sw [ms]` | pulse the relay on GP15 |
+| `sw [ms]` | pulse the relay on GP15 (from the [old HDMI-switch setup](../docs/archive/anker-switch-setup.md); nothing needs it now) |
 | `tm <tap> <gap> <type> <typegap> <media> <copies>` | change key timing live |
 | `ping`, `usb`, `stats`, `reboot` | diagnostics |
