@@ -29,7 +29,7 @@ See `docs/HISTORY.md`.
 | Micro-USB **data** cable | For the first flash only. Charge-only cables won't show the drive. |
 | USB HDMI capture card | Tested: Elgato Cam Link 4K. Any card should work if it's **UVC / driver-free** (shows up like a webcam), captures **HDMI audio** too, accepts the box's output resolution, and does **1080p60** (USB 3 sends it uncompressed; USB 2 cards send compressed MJPEG, often only 1080p30, which `install.sh` detects). No passthrough needed. Plug USB 3 cards into a USB 3 port. |
 | Host computer | Any always-on Linux machine: an old laptop or mini PC (x86), a Raspberry Pi 5, or a VM/LXC on a home server. Needs a USB 3 port for the capture card. Cheap option: a used business mini PC with an 8th-gen Intel i5 or newer (Lenovo ThinkCentre Tiny, HP EliteDesk Mini, Dell OptiPlex Micro). |
-| HDMI splitter (layouts B/C) | Tested model: *to be confirmed*. |
+| HDMI splitter (layouts B/C) | Tested: **ezcoo SP12H2** (1x2 with EDID modes and a downscaler). Worked on its defaults: EDID on Copy, downscaler off on both outputs. If one output stays black, try the other EDID modes, then the downscaler, power-cycling the splitter after each change. |
 | HDMI cables | One per connection in your layout. |
 
 ## 2. Flash and set up the Pico (hands-on)

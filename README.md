@@ -43,8 +43,7 @@ how to walk you through the setup and which mistakes to avoid.
 | Raspberry Pi Pico 2 W | The USB keyboard/mouse. About $7. |
 | USB HDMI capture card | Elgato Cam Link 4K used here. Cheaper cards should work if they meet the requirements in [SETUP.md](docs/SETUP.md#1-parts) (untested so far). |
 | Always-on computer | Linux host for capture + web server. Here: an old laptop running Proxmox. |
-| HDMI splitter *(optional)* | Only if the TV should keep working too. Tested model to be confirmed. |
-| 5V relay module *(optional)* | Only for pressing a physical HDMI-switch button (GP15). |
+| HDMI splitter *(optional)* | Only if the TV should keep working too. Tested: **ezcoo SP12H2** (1x2), default settings. |
 
 ## Quick facts
 

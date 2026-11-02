@@ -111,7 +111,7 @@ flowchart LR
             CT["Linux container<br/>ffmpeg + MediaMTX + control page"]
         end
         BOX["vSeeBox<br/>(isolated IoT network)"]
-        SPL["HDMI splitter"]
+        SPL["ezcoo SP12H2<br/>HDMI splitter"]
         CAPT["Elgato Cam Link 4K"]
         TX["OREI HDMI extender<br/>sender"]
         PICO["Pico 2 W"]
