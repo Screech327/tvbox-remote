@@ -14,6 +14,7 @@
     -TestPattern  stream a test picture instead of a capture card (to try everything else first)
     -Update       download ffmpeg / MediaMTX / Python again, even if they're already there
     -Restart      restart it (after editing tvbox.env)
+    -Firewall     only (re)create the firewall rules
     -Uninstall    stop it and remove everything it installed
 #>
 [CmdletBinding()]
@@ -24,6 +25,7 @@ param(
     [switch]$TestPattern,
     [switch]$Update,
     [switch]$Restart,
+    [switch]$Firewall,
     [switch]$Uninstall,
     [string]$Ref = 'main'
 )
@@ -79,13 +81,23 @@ function Start-TvBox {
 }
 
 function Invoke-Admin($script) {
-    # Runs a small script elevated (one UAC prompt). Returns $false if the prompt was declined.
-    $bytes = [Text.Encoding]::Unicode.GetBytes($script)
+    # Runs a small script elevated (one UAC prompt). The elevated script writes "OK" or its error to a file,
+    # because an elevated process's exit code isn't reliable here. Returns $true only if it really worked.
+    $result = Join-Path $Dir 'logs\admin-result.txt'
+    Remove-Item $result -Force -ErrorAction SilentlyContinue
+    $full = "try { `$ErrorActionPreference='Stop'; $script; 'OK' | Set-Content -LiteralPath '$($result -replace "'", "''")' } " +
+            "catch { `$_.Exception.Message | Set-Content -LiteralPath '$($result -replace "'", "''")' }"
+    $bytes = [Text.Encoding]::Unicode.GetBytes($full)
     try {
-        $p = Start-Process powershell -Verb RunAs -Wait -PassThru -WindowStyle Hidden `
-             -ArgumentList '-NoProfile', '-EncodedCommand', [Convert]::ToBase64String($bytes)
-        return ($p.ExitCode -eq 0)
-    } catch { return $false }
+        Start-Process -FilePath "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -Verb RunAs -Wait `
+            -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', [Convert]::ToBase64String($bytes)
+    } catch {
+        Warn "Admin prompt didn't run: $($_.Exception.Message)"
+        return $false
+    }
+    $out = if (Test-Path $result) { (Get-Content $result -Raw).Trim() } else { 'no result (prompt declined?)' }
+    if ($out -ne 'OK') { Warn "Admin step failed: $out" }
+    return ($out -eq 'OK')
 }
 
 function Get-File($url, $out) {
@@ -127,6 +139,18 @@ function Test-PortFree($port) {
     } catch { return $false }
 }
 
+function Set-FirewallRules {
+    Say 'Firewall'
+    Note 'Windows will ask for admin once, to let your home network and Tailscale reach the page and the stream.'
+    $pyw = $PythonW -replace "'", "''"                 # quote-safe for the elevated script
+    $mtx = "$Dir\mediamtx\mediamtx.exe" -replace "'", "''"
+    $fw = "Remove-NetFirewallRule -DisplayName '$Rule*' -ErrorAction SilentlyContinue; " +
+          "New-NetFirewallRule -DisplayName '$Rule (control page)' -Direction Inbound -Action Allow -Program '$pyw' -RemoteAddress LocalSubnet,100.64.0.0/10 -Profile Any | Out-Null; " +
+          "New-NetFirewallRule -DisplayName '$Rule (stream)' -Direction Inbound -Action Allow -Program '$mtx' -RemoteAddress LocalSubnet,100.64.0.0/10 -Profile Any | Out-Null"
+    if (Invoke-Admin $fw) { Note 'Allowed: your local network and Tailscale (100.64.0.0/10) only.' }
+    else { Warn 'Skipped. When Windows asks about Python or MediaMTX the first time, click Allow (Private networks).' }
+}
+
 # ------------------------------------------------------------------------------------------------------------
 
 if (-not [Environment]::Is64BitOperatingSystem) { throw 'tvbox-remote needs 64-bit Windows 10 or 11.' }
@@ -135,13 +159,15 @@ if ($Uninstall) {
     Say 'Removing tvbox-remote'
     Stop-TvBox
     Remove-Item $Startup, $MenuLink -Force -ErrorAction SilentlyContinue
-    if (-not (Invoke-Admin "Remove-NetFirewallRule -DisplayName '$Rule*' -ErrorAction SilentlyContinue; exit 0")) {
+    if (-not (Invoke-Admin "Remove-NetFirewallRule -DisplayName '$Rule*' -ErrorAction SilentlyContinue")) {
         Warn "Couldn't remove the firewall rules (admin prompt declined). They're named '$Rule ...' if you want to remove them by hand."
     }
     Remove-Item $Dir -Recurse -Force -ErrorAction SilentlyContinue
     Note 'Done. (Sleep settings were left as they are.)'
     return
 }
+
+if ($Firewall) { Set-FirewallRules; return }
 
 if ($Restart) {
     Say 'Restarting tvbox-remote'
@@ -197,18 +223,7 @@ if ($Name)        { $setupArgs += @('--name', $Name) }
 & $Python @setupArgs
 if ($LASTEXITCODE -ne 0) { throw 'Setup stopped (see the message above). Fix it and run the installer again.' }
 
-Say 'Firewall'
-Note 'Windows will ask for admin once, to let your home network and Tailscale reach the page and the stream.'
-$pyw = $PythonW -replace "'", "''"                 # quote-safe for the elevated script
-$mtx = "$Dir\mediamtx\mediamtx.exe" -replace "'", "''"
-$fw = @"
-Remove-NetFirewallRule -DisplayName '$Rule*' -ErrorAction SilentlyContinue
-New-NetFirewallRule -DisplayName '$Rule (control page)' -Direction Inbound -Action Allow -Program '$pyw' -RemoteAddress LocalSubnet,100.64.0.0/10 -Profile Any | Out-Null
-New-NetFirewallRule -DisplayName '$Rule (stream)' -Direction Inbound -Action Allow -Program '$mtx' -RemoteAddress LocalSubnet,100.64.0.0/10 -Profile Any | Out-Null
-exit 0
-"@
-if (Invoke-Admin $fw) { Note 'Allowed: your local network and Tailscale (100.64.0.0/10) only.' }
-else { Warn 'Skipped. When Windows asks about Python or MediaMTX the first time, click Allow (Private networks).' }
+Set-FirewallRules
 
 Say 'Start at log-on'
 $ws = New-Object -ComObject WScript.Shell
