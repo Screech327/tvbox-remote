@@ -57,18 +57,21 @@ def encoder_args(enc, bitrate, gop, cfg=None):
     cfg = CFG if cfg is None else cfg
     mb = int("".join(c for c in bitrate if c.isdigit()) or 8)
     rate = ["-b:v", bitrate, "-maxrate", bitrate, "-bufsize", "%dM" % max(1, mb // 2), "-g", str(gop)]
+    # Graphics-card encoders in low-latency mode can ignore -g and send one keyframe at the very start (seen on
+    # AMD). A browser that connects later then never gets a picture, so force a real keyframe every 2 seconds.
+    keys = ["-force_key_frames", "expr:gte(t,n_forced*2)"]
     if enc == "nvenc":     # NVIDIA
         return ["-c:v", "h264_nvenc", "-preset", "p1", "-tune", "ull", "-zerolatency", "1", "-delay", "0",
-                "-rc", "cbr", "-profile:v", "baseline", "-bf", "0", "-pix_fmt", "yuv420p"] + rate
+                "-rc", "cbr", "-profile:v", "baseline", "-bf", "0", "-forced-idr", "1", "-pix_fmt", "yuv420p"] + rate + keys
     if enc == "qsv":       # Intel Quick Sync
         return ["-c:v", "h264_qsv", "-preset", "veryfast", "-look_ahead", "0", "-async_depth", "1",
                 "-low_delay_brc", "1", "-profile:v", cfg.get("QSV_PROFILE", "baseline"), "-bf", "0",
-                "-pix_fmt", "nv12"] + rate
+                "-forced_idr", "1", "-pix_fmt", "nv12"] + rate + keys
     if enc == "amf":       # AMD
         # header_spacing: repeat SPS/PPS with every keyframe, or browsers that join mid-stream never get a picture
         return ["-c:v", "h264_amf", "-usage", "ultralowlatency", "-quality", "speed", "-rc", "cbr",
                 "-profile:v", "constrained_baseline", "-bf", "0", "-header_spacing", str(gop),
-                "-pix_fmt", "yuv420p"] + rate
+                "-forced_idr", "1", "-pix_fmt", "yuv420p"] + rate + keys
     # CPU (same as the Linux stream)
     return ["-c:v", "libx264", "-preset", cfg.get("PRESET", "superfast"), "-tune", "zerolatency",
             "-profile:v", "baseline", "-pix_fmt", "yuv420p", "-keyint_min", str(max(1, gop // 2)),
