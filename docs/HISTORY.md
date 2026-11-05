@@ -169,3 +169,24 @@ page has a Restart box button now.
 - Copying the dongle's USB ID. The generic Raspberry Pi ID works fine (and any ID looked broken while the box was
   in its stuck state).
 - Sending duplicate reports "in case they get lost." Nothing gets lost.
+
+## Windows host (Nov 2026)
+
+A friend without a home lab wanted to run it on his PC, so there's a Windows version: the same MediaMTX, the same
+`server.py` and page, and ffmpeg reading the capture card through DirectShow. Decisions and lessons:
+
+- **One PowerShell command, everything in `%LOCALAPPDATA%`.** It downloads ffmpeg, MediaMTX and the portable
+  ("embeddable") Python, so nothing has to be installed system-wide and `-Uninstall` removes it all.
+- **Starts at log-on, not as a Windows service.** Capture cards are cameras to Windows, and camera access from a
+  service is unreliable. The catch: after a reboot it's off until someone logs in.
+- **Uses the graphics card for the video when it can** (NVIDIA NVENC, Intel Quick Sync, AMD AMF), falling back to
+  the CPU (x264, like Linux). The installer test-encodes with each one to see which works.
+- **AMD sent one keyframe and then never another.** In its low-latency mode the AMD encoder ignored the
+  "keyframe every 2 seconds" setting. MediaMTX said "live", the browser connected, and the picture stayed black,
+  because a browser that joins mid-stream needs a keyframe to start. Fix: force a keyframe (IDR) every 2 seconds on
+  all graphics-card encoders, and repeat the SPS/PPS headers with each one.
+- **The firewall rules** allow only the local network and Tailscale (100.64.0.0/10). The first version's admin
+  prompt never appeared because of a PowerShell quirk (a method call passed as a command argument splits into two
+  arguments); the elevated step now reports its own result.
+- **Pick the capture format that really does 1080p60.** Same issue as on Linux: cheap cards list uncompressed
+  1080p at 5 fps and real 1080p60 only as MJPEG.

@@ -20,10 +20,12 @@ already documented there.
    - reserving the Pico's IP in their router
    - logging into Tailscale
    - restarting the TV box
-4. **The rest can run on the host** if you have shell access: `server/stream/install.sh` and
+4. **Windows host:** follow "Windows host" in `docs/SETUP.md` instead of steps 3–5 (one PowerShell command; the
+   person answers the Pico IP/token questions and the admin prompt). Logs are in `%LOCALAPPDATA%\tvbox-remote\logs`.
+5. **Linux: the rest can run on the host** if you have shell access: `server/stream/install.sh` and
    `server/control/install.sh <pico-ip> <token>`. Otherwise give the exact commands one at a time, as separate
    code blocks.
-5. Firmware: use the prebuilt `.uf2`/`.bin` from the latest Release (https://github.com/Screech327/tvbox-remote/releases/latest). Only build from source if
+6. Firmware: use the prebuilt `.uf2`/`.bin` from the latest Release (https://github.com/Screech327/tvbox-remote/releases/latest). Only build from source if
    asked; `firmware/README.md` has the exact board options, and they matter.
 
 ## Rules learned the hard way (see docs/HISTORY.md)
@@ -90,4 +92,5 @@ the issue with what changed.
 - `firmware/tvbox-remote/`: Pico 2 W firmware (arduino-pico 6.3.1, Adafruit TinyUSB, 4 MB with a 2 MB FS)
 - `server/stream/`: ffmpeg → MediaMTX (WebRTC :8889 path `/vseebox`, HLS :8888), systemd units
 - `server/control/`: `server.py` (stdlib only) + `index.html`, port 80, talks UDP 4210 to the Pico with the token
+- `server/windows/`: `install.ps1` (Windows installer) + `tvbox-host.pyw` (runs MediaMTX, ffmpeg and server.py)
 - `server/examples/proxmox-lxc-setup.sh`: optional Proxmox LXC installer

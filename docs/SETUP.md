@@ -28,7 +28,7 @@ See `docs/HISTORY.md`.
 | Raspberry Pi Pico 2 W | Must be the **2 W** (Wi-Fi + RP2350). About $7. |
 | Micro-USB **data** cable | For the first flash only. Charge-only cables won't show the drive. |
 | USB HDMI capture card | Tested: Elgato Cam Link 4K. Any card should work if it's **UVC / driver-free** (shows up like a webcam), captures **HDMI audio** too, accepts the box's output resolution, and does **1080p60** (USB 3 sends it uncompressed; USB 2 cards send compressed MJPEG, often only 1080p30, which `install.sh` detects). No passthrough needed. Plug USB 3 cards into a USB 3 port. |
-| Host computer | Any always-on Linux machine: an old laptop or mini PC (x86), a Raspberry Pi 5, or a VM/LXC on a home server. Needs a USB 3 port for the capture card. Cheap option: a used business mini PC with an 8th-gen Intel i5 or newer (Lenovo ThinkCentre Tiny, HP EliteDesk Mini, Dell OptiPlex Micro). |
+| Host computer | Any always-on Linux machine: an old laptop or mini PC (x86), a Raspberry Pi 5, or a VM/LXC on a home server. **Or a Windows 10/11 PC** (see [Windows host](#windows-host-instead-of-steps-35)); it only streams while the PC is on and awake. Needs a USB 3 port for the capture card. Cheap option: a used business mini PC with an 8th-gen Intel i5 or newer (Lenovo ThinkCentre Tiny, HP EliteDesk Mini, Dell OptiPlex Micro). |
 | HDMI splitter (layouts B/C) | Tested: **ezcoo SP12H2** (1x2 with EDID modes and a downscaler). Worked on its defaults: EDID on Copy, downscaler off on both outputs. If one output stays black, try the other EDID modes, then the downscaler, power-cycling the splitter after each change. |
 | HDMI cables | One per connection in your layout. |
 
@@ -44,6 +44,9 @@ Plug the Pico into a **USB port on the TV box**. Any port works. The Pico is pow
 **Check:** `http://<pico-ip>/status` shows `"mounted":true`.
 
 ## 3. Prepare the host
+
+*Using a Windows PC as the host? Skip steps 3–5 and follow [Windows host](#windows-host-instead-of-steps-35), then
+continue at step 6.*
 
 - Debian 12/13, Ubuntu 22.04+ or Raspberry Pi OS (64-bit). A fresh install is fine.
 - Plug the capture card into the host, and the TV box's HDMI into the capture card (or the splitter, for B/C).
@@ -84,6 +87,36 @@ highlight move on the stream.
 Settings are in `/etc/vseebox-control.env`. After editing: `sudo systemctl restart vseebox-control`.
 To show your box's name on the page instead of "TV Box", set `BOX_NAME=` there.
 
+## Windows host (instead of steps 3–5)
+
+Runs the same stream and control page on a Windows 10/11 PC. Everything goes into `%LOCALAPPDATA%\tvbox-remote`;
+nothing else on the PC changes, and `-Uninstall` removes it all.
+
+1. Plug the capture card into a USB 3 port and the TV box's HDMI into it (or into the splitter).
+2. Close anything using the capture card (OBS, the Camera app, Elgato Camera Hub).
+3. Open **PowerShell** (not as administrator) and run:
+   ```powershell
+   irm https://raw.githubusercontent.com/Screech327/tvbox-remote/main/server/windows/install.ps1 | iex
+   ```
+   It downloads ffmpeg, MediaMTX and a portable Python (about 230 MB), finds the capture card, picks the video
+   encoder (NVIDIA, Intel or AMD graphics, otherwise the CPU), asks for the **Pico's IP and token**, asks for admin
+   once for the firewall rules (home network and Tailscale only), offers to turn off sleep, and opens the page.
+
+**Check:** the page opens at `http://localhost/` with the TV box's picture, and both status pills are green. From
+a phone on the same Wi-Fi, open the `http://<pc-ip>/` address the installer printed.
+
+- **It starts when you log in,** with no window (Startup folder shortcut). After a reboot it's off until someone logs in.
+- **The PC has to stay awake.** Say yes to the sleep question, or set sleep to Never while plugged in.
+- **Options** (download `install.ps1` and run `powershell -ExecutionPolicy Bypass -File install.ps1 <option>`):
+  - `-TestPattern`: stream a test picture instead of a capture card, to try everything else first
+  - `-PicoIp <ip> -Token <token> -Name <box name>`: skip those questions
+  - `-Restart`: after editing `%LOCALAPPDATA%\tvbox-remote\tvbox.env`
+  - `-Firewall`: redo just the firewall rules
+  - `-Update`: download ffmpeg / MediaMTX / Python again
+  - `-Uninstall`: stop it and remove everything
+- **Logs:** `%LOCALAPPDATA%\tvbox-remote\logs` (`host.log`, `ffmpeg.log`, `mediamtx.log`).
+- If port 80 is taken by another program, the page goes on port 8080 and the installer prints the address.
+
 ## 6. Watch from anywhere (Tailscale)
 
 1. Install Tailscale on the host and log in: `curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up`
@@ -118,4 +151,7 @@ To show your box's name on the page instead of "TV Box", set `BOX_NAME=` there.
 | Pico LED blinking fast | Joining Wi-Fi. If it stays that way, check the 2.4 GHz network and the password. |
 | Control page: "Remote" pill red | Wrong Pico IP or token in `/etc/vseebox-control.env`, or the Pico is offline. Test: `http://<pico-ip>/status`. |
 | Lists overshoot when holding a key | Update to the latest control page. It holds keys for real instead of repeating taps. |
+| **Windows:** no capture card found, or `ffmpeg.log` says "Could not run graph" / "I/O error" | Another app has the card open (OBS, Camera, Elgato Camera Hub): close it. Check Settings > Privacy & security > Camera > "Let desktop apps access your camera" is On. Then run the installer with `-Restart`. |
+| **Windows:** page works on the PC but not from a phone | The firewall rules are missing: run the installer with `-Firewall` and click Yes. The PC must be on a network marked Private, or reached over Tailscale. |
+| **Windows:** "Stream: live" but the picture stays black | Set `ENCODER=x264` in `tvbox.env` and restart. If that fixes it, the graphics-card encoder is the problem: report it (see CONTRIBUTING.md) with the graphics card model. |
 | Box went to sleep and won't wake | A **long** Power press sleeps it, and the Pico can't wake it, because USB is off while it's asleep. Use the IR remote or a smart plug. |

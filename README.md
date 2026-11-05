@@ -11,8 +11,8 @@ Watch and control an Android TV box from anywhere, in a browser, on a computer o
 Tested on a **vSeeBox**. It should work with most Android TV boxes that accept a USB keyboard and mouse.
 
 > **Status:** working and in daily use on the reference build (Linux host, Elgato Cam Link 4K, ezcoo SP12H2
-> splitter, vSeeBox). Next up: a Windows host version (no Linux box needed), a one-command Docker setup and
-> automatic Pico discovery. Found a problem? See below.
+> splitter, vSeeBox). A Windows host version is new (tested with a test picture on an AMD PC; first real
+> capture card on Windows still to come). Next up: a one-command Docker setup and automatic Pico discovery.
 
 ## Set it up
 
@@ -31,6 +31,7 @@ how to walk you through the setup and which mistakes to avoid.
 | `firmware/patches/` | Optional TinyUSB patch that enables the `/usblog` USB request log |
 | `server/stream/` | Capture + streaming: ffmpeg → MediaMTX (WebRTC/HLS), systemd units |
 | `server/control/` | Control page + small Python server (no dependencies) |
+| `server/windows/` | Windows host: one-command installer (`install.ps1`) and the host program |
 | `server/examples/` | Optional: Proxmox LXC installer |
 | `docs/SETUP.md` | **Step-by-step setup guide** |
 | `docs/DIAGRAMS.md` | Which layout you need, how it all connects, and the reference home-lab build |
@@ -43,7 +44,7 @@ how to walk you through the setup and which mistakes to avoid.
 |---|---|
 | Raspberry Pi Pico 2 W | The USB keyboard/mouse. About $7. |
 | USB HDMI capture card | Elgato Cam Link 4K used here. Cheaper cards should work if they meet the requirements in [SETUP.md](docs/SETUP.md#1-parts) (untested so far). |
-| Always-on computer | Linux host for capture + web server. Here: an old laptop running Proxmox. |
+| Always-on computer | Linux host for capture + web server (here: an old laptop running Proxmox), or a **Windows PC**. |
 | HDMI splitter *(optional)* | Only if the TV should keep working too. Tested: **ezcoo SP12H2** (1x2), default settings. |
 
 ## Quick facts
