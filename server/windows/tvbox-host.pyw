@@ -65,8 +65,10 @@ def encoder_args(enc, bitrate, gop, cfg=None):
                 "-low_delay_brc", "1", "-profile:v", cfg.get("QSV_PROFILE", "baseline"), "-bf", "0",
                 "-pix_fmt", "nv12"] + rate
     if enc == "amf":       # AMD
+        # header_spacing: repeat SPS/PPS with every keyframe, or browsers that join mid-stream never get a picture
         return ["-c:v", "h264_amf", "-usage", "ultralowlatency", "-quality", "speed", "-rc", "cbr",
-                "-profile:v", "constrained_baseline", "-bf", "0", "-pix_fmt", "yuv420p"] + rate
+                "-profile:v", "constrained_baseline", "-bf", "0", "-header_spacing", str(gop),
+                "-pix_fmt", "yuv420p"] + rate
     # CPU (same as the Linux stream)
     return ["-c:v", "libx264", "-preset", cfg.get("PRESET", "superfast"), "-tune", "zerolatency",
             "-profile:v", "baseline", "-pix_fmt", "yuv420p", "-keyint_min", str(max(1, gop // 2)),
