@@ -87,10 +87,10 @@ function Invoke-Admin($script) {
     Remove-Item $result -Force -ErrorAction SilentlyContinue
     $full = "try { `$ErrorActionPreference='Stop'; $script; 'OK' | Set-Content -LiteralPath '$($result -replace "'", "''")' } " +
             "catch { `$_.Exception.Message | Set-Content -LiteralPath '$($result -replace "'", "''")' }"
-    $bytes = [Text.Encoding]::Unicode.GetBytes($full)
+    $enc = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($full))
     try {
         Start-Process -FilePath "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -Verb RunAs -Wait `
-            -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', [Convert]::ToBase64String($bytes)
+            -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', $enc)
     } catch {
         Warn "Admin prompt didn't run: $($_.Exception.Message)"
         return $false
